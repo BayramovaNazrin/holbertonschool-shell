@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-#commm
-while IFS=':' read -r user _ uid _ _ _ home _; do
-  echo "$user:$uid:$home"
+#comm
+while IFS=':' read -r user pass uid gid comment home shell
+do
+    echo "$user:$uid:$home"
 done < /etc/passwd

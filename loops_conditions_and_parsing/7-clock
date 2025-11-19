@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#commen
+#comm
 h=0
 while [ "$h" -le 12 ]
 do

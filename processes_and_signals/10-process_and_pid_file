@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-# Process that writes PID file, prints messages, and handles signals
+# Create PID file, print message forever, and handle signals
 
-PIDFILE="/var/run/myscript.pid"
-echo "$$" > "$PIDFILE"
+PID_FILE="/var/run/myscript.pid"
+
+# Write our own PID to the PID file
+echo "$$" > "$PID_FILE" || exit 1
 
 handle_sigint() {
     echo "Y U no love me?!"
@@ -10,12 +12,12 @@ handle_sigint() {
 
 handle_sigterm() {
     echo "I hate the kill command"
-    rm -f "$PIDFILE"
+    rm -f "$PID_FILE"
     exit 0
 }
 
 handle_sigquit() {
-    rm -f "$PIDFILE"
+    rm -f "$PID_FILE"
     exit 0
 }
 
@@ -23,7 +25,7 @@ trap handle_sigint INT
 trap handle_sigterm TERM
 trap handle_sigquit QUIT
 
-while true
+while : 
 do
     echo "To infinity and beyond"
     sleep 1

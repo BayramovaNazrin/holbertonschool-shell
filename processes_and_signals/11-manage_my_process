@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # try
+#!/bin/bash
+
 PID_FILE="/var/run/my_process.pid"
 
 case "${1:-}" in
@@ -19,7 +21,7 @@ case "${1:-}" in
         echo "manage_my_process stopped"
         ;;
     restart)
-        # — Stop (silent) —
+        # Stop silently
         if [ -f "$PID_FILE" ]; then
             pid=$(cat "$PID_FILE" 2>/dev/null) || pid=
             if [ -n "$pid" ] && [ "$pid" -gt 0 ] 2>/dev/null; then
@@ -27,14 +29,14 @@ case "${1:-}" in
             fi
             rm -f "$PID_FILE"
         fi
-        # — Start (silent) —
+        # Start silently
         ./manage_my_process >/dev/null 2>&1 &
         printf '%s\n' "$!" > "$PID_FILE" 2>/dev/null || true
-        # — Output only this:
         echo "manage_my_process restarted"
         ;;
     *)
-        echo "Usage: manage_my_process {start|stop|restart}" >&2
+        # ⚠️ Critical: print to stdout (not stderr), and use "your"
+        echo "Usage: manage_your_process {start|stop|restart}"
         exit 1
         ;;
 esac

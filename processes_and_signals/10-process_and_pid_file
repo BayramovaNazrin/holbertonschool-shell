@@ -2,21 +2,15 @@
 #comen
 PID_FILE="/var/run/myscript.pid"
 
-# Define cleanup
-cleanup() {
-    rm -f "$PID_FILE"
-    exit 0
-}
+# Immediately write PID — before any traps (to avoid race)
+echo "$$" > "$PID_FILE"
 
-# Set traps
+# Now set traps
 trap 'echo "Y U no love me?!"' INT
-trap 'echo "I hate the kill command"; cleanup' TERM
-trap 'cleanup' QUIT
+trap 'echo "I hate the kill command"; rm -f "$PID_FILE"; exit' TERM
+trap 'rm -f "$PID_FILE"; exit' QUIT
 
-# Write PID — critical step
-echo $$ > "$PID_FILE"
-
-# Infinite loop
+# Loop forever
 while true; do
     echo "To infinity and beyond"
     sleep 1

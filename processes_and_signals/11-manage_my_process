@@ -1,34 +1,40 @@
 #!/usr/bin/env bash
 # try
-#!/usr/bin/env bash
-# Create PID file, print message forever, and handle signals
+PID_FILE="/var/run/my_process.pid"
 
-PIDFILE="/run/myscript.pid"
-
-echo "$$" > "$PIDFILE"
-
-handle_sigint() {
-    echo "Y U no love me?!"
-}
-
-handle_sigterm() {
-    echo "I hate the kill command"
-    rm -f "$PIDFILE"
-    exit 0
-}
-
-handle_sigquit() {
-    rm -f "$PIDFILE"
-    exit 0
-}
-
-trap handle_sigint INT
-trap handle_sigterm TERM
-trap handle_sigquit QUIT
-
-while :
-do
-    echo "To infinity and beyond"
-    sleep 1
-done
-
+case "${1:-}" in
+    start)
+        ./manage_my_process >/dev/null 2>&1 &
+        printf '%s\n' "$!" > "$PID_FILE" 2>/dev/null || true
+        echo "manage_my_process started"
+        ;;
+    stop)
+        if [ -f "$PID_FILE" ]; then
+            pid=$(cat "$PID_FILE" 2>/dev/null) || pid=
+            if [ -n "$pid" ] && [ "$pid" -gt 0 ] 2>/dev/null; then
+                kill "$pid" 2>/dev/null || true
+            fi
+            rm -f "$PID_FILE"
+        fi
+        echo "manage_my_process stopped"
+        ;;
+    restart)
+        # Stop silently
+        if [ -f "$PID_FILE" ]; then
+            pid=$(cat "$PID_FILE" 2>/dev/null) || pid=
+            if [ -n "$pid" ] && [ "$pid" -gt 0 ] 2>/dev/null; then
+                kill "$pid" 2>/dev/null || true
+            fi
+            rm -f "$PID_FILE"
+        fi
+        # Start silently
+        ./manage_my_process >/dev/null 2>&1 &
+        printf '%s\n' "$!" > "$PID_FILE" 2>/dev/null || true
+        echo "manage_my_process restarted"
+        ;;
+    *)
+        # ⚠️ Critical: print to stdout (not stderr), and use "your"
+        echo "Usage: manage_your_process {start|stop|restart}"
+        exit 1
+        ;;
+esac

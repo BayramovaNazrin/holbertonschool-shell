@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Write heartbeat to file
+exec >> /tmp/my_process
+
 while true; do
-    echo "I am alive!" >> /tmp/my_process
+    echo "I am alive!"
     sleep 2
 done

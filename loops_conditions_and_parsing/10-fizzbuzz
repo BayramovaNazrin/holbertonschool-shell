@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+#dsc
 i=1
 while [ $i -le 100 ]
 do

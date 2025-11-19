@@ -1,23 +1,22 @@
 #!/usr/bin/env bash
-#comment
+#comen
 PID_FILE="/var/run/myscript.pid"
 
-# Cleanup function
+# Define cleanup
 cleanup() {
-    echo "Cleaning up..."
     rm -f "$PID_FILE"
     exit 0
 }
 
-# Trap signals
-trap 'echo "Y U no love me?!"' SIGINT
-trap 'echo "I hate the kill command"; cleanup' SIGTERM
-trap 'cleanup' SIGQUIT
+# Set traps
+trap 'echo "Y U no love me?!"' INT
+trap 'echo "I hate the kill command"; cleanup' TERM
+trap 'cleanup' QUIT
 
-# Create PID file
+# Write PID — critical step
 echo $$ > "$PID_FILE"
 
-# Main loop
+# Infinite loop
 while true; do
     echo "To infinity and beyond"
     sleep 1

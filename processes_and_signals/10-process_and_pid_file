@@ -1,18 +1,35 @@
 #!/usr/bin/env bash
-# PID file + signal-handling script
+# PID file creation, message loop, and proper signal handling
 
-echo "$$" > /var/run/myscript.pid
+PIDFILE="/var/run/myscript.pid"
 
-cleanup_and_exit() {
-    rm -f /var/run/myscript.pid
+if ! echo "$$" > "$PIDFILE" 2>/dev/null; then
+    PIDFILE="/tmp/myscript.pid"
+    echo "$$" > "$PIDFILE"
+fi
+
+handle_sigint() {
+    echo "Y U no love me?!"
+}
+
+handle_sigterm() {
+    echo "I hate the kill command"
+    rm -f "$PIDFILE"
     exit 0
 }
 
-trap 'echo "I hate the kill command"; cleanup_and_exit' SIGTERM
-trap 'echo "Y U no love me?!"' SIGINT
-trap 'cleanup_and_exit' SIGQUIT
+handle_sigquit() {
+    rm -f "$PIDFILE"
+    exit 0
+}
 
-while true; do
+trap handle_sigint INT
+trap handle_sigterm TERM
+trap handle_sigquit QUIT
+
+while :
+do
     echo "To infinity and beyond"
-    sleep 2
+    sleep 1
 done
+

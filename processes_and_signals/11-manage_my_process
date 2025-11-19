@@ -1,58 +1,40 @@
 #!/usr/bin/env bash
 # try
 PID_FILE="/var/run/my_process.pid"
-DAEMON="./manage_my_process"
-
-usage() {
-    echo "Usage: manage_my_process {start|stop|restart}" >&2
-    exit 1
-}
-
-start() {
-    # Start daemon in background
-    "$DAEMON" > /dev/null 2>&1 &
-    local pid=$!
-    # Write PID securely
-    printf '%s\n' "$pid" > "$PID_FILE"
-    echo "manage_my_process started"
-}
-
-stop() {
-    if [ -f "$PID_FILE" ]; then
-        local pid
-        # Read PID safely
-        if ! pid=$(cat "$PID_FILE") || [ -z "$pid" ]; then
-            rm -f "$PID_FILE"
-            echo "manage_my_process stopped"
-            return
-        fi
-
-        # Validate PID is numeric
-        if [[ "$pid" =~ ^[0-9]+$ ]] && kill -0 "$pid" 2>/dev/null; then
-            kill "$pid" 2>/dev/null
-        fi
-        rm -f "$PID_FILE"
-    fi
-    echo "manage_my_process stopped"
-}
-
-restart() {
-    stop >/dev/null 2>&1
-    start
-    echo "manage_my_process restarted"
-}
 
 case "${1:-}" in
     start)
-        start
+        ./manage_my_process >/dev/null 2>&1 &
+        printf '%s\n' "$!" > "$PID_FILE" 2>/dev/null || true
+        echo "manage_my_process started"
         ;;
     stop)
-        stop
+        if [ -f "$PID_FILE" ]; then
+            pid=$(cat "$PID_FILE" 2>/dev/null) || pid=
+            if [ -n "$pid" ] && [ "$pid" -gt 0 ] 2>/dev/null; then
+                kill "$pid" 2>/dev/null || true
+            fi
+            rm -f "$PID_FILE"
+        fi
+        echo "manage_my_process stopped"
         ;;
     restart)
-        restart
+        # — Stop (silent) —
+        if [ -f "$PID_FILE" ]; then
+            pid=$(cat "$PID_FILE" 2>/dev/null) || pid=
+            if [ -n "$pid" ] && [ "$pid" -gt 0 ] 2>/dev/null; then
+                kill "$pid" 2>/dev/null || true
+            fi
+            rm -f "$PID_FILE"
+        fi
+        # — Start (silent) —
+        ./manage_my_process >/dev/null 2>&1 &
+        printf '%s\n' "$!" > "$PID_FILE" 2>/dev/null || true
+        # — Output only this:
+        echo "manage_my_process restarted"
         ;;
     *)
-        usage
+        echo "Usage: manage_my_process {start|stop|restart}" >&2
+        exit 1
         ;;
 esac

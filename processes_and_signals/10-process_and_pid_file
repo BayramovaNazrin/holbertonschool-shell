@@ -1,12 +1,9 @@
 #!/usr/bin/env bash
-# PID file creation, message loop, and proper signal handling
+# Create PID file, print message forever, and handle signals
 
 PIDFILE="/var/run/myscript.pid"
 
-if ! echo "$$" > "$PIDFILE" 2>/dev/null; then
-    PIDFILE="/tmp/myscript.pid"
-    echo "$$" > "$PIDFILE"
-fi
+echo "$$" > "$PIDFILE"
 
 handle_sigint() {
     echo "Y U no love me?!"
@@ -32,4 +29,3 @@ do
     echo "To infinity and beyond"
     sleep 1
 done
-

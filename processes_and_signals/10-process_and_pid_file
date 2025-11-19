@@ -1,24 +1,30 @@
 #!/usr/bin/env bash
-# PID file + signal handling
+# Process that writes PID file, prints messages, and handles signals
 
-echo "$$" > /var/run/myscript.pid
+PIDFILE="/var/run/myscript.pid"
+echo "$$" > "$PIDFILE"
 
-term_handler() {
+handle_sigint() {
+    echo "Y U no love me?!"
+}
+
+handle_sigterm() {
     echo "I hate the kill command"
-    rm -f /var/run/myscript.pid
+    rm -f "$PIDFILE"
     exit 0
 }
 
-quit_handler() {
-    rm -f /var/run/myscript.pid
+handle_sigquit() {
+    rm -f "$PIDFILE"
     exit 0
 }
 
-trap 'term_handler' SIGTERM
-trap 'echo "Y U no love me?!";' SIGINT
-trap 'quit_handler' SIGQUIT
+trap handle_sigint INT
+trap handle_sigterm TERM
+trap handle_sigquit QUIT
 
-while true; do
+while true
+do
     echo "To infinity and beyond"
-    sleep 2
+    sleep 1
 done
